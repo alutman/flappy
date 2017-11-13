@@ -5,6 +5,7 @@ import flappy.GamePanel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -18,7 +19,7 @@ public class Pipes implements GameEntity {
 
     private ArrayList<Rectangle> rects = new ArrayList<Rectangle>();
     private Image pipeHead, pipeLength;
-    private final int PIPE_W = 75, PIPE_H = 60;
+    private final int PIPE_W = 90, PIPE_H = 60;
 
     private final int VX = -3;
 
@@ -37,6 +38,17 @@ public class Pipes implements GameEntity {
     @Override
     public void reset() {
         this.rects.clear();
+    }
+
+    public Line2D scoringLine(Rectangle r) {
+        return new Line2D.Float(r.x + r.width/2, 0, r.x + r.width/2, FlappyBird.HEIGHT);
+    }
+
+    public boolean intersectsLine(Rectangle other) {
+        for(Rectangle r : rects) {
+            if(other.intersectsLine(scoringLine(r))) return true;
+        }
+        return false;
     }
 
     public boolean intersects(Rectangle other) {
@@ -83,6 +95,8 @@ public class Pipes implements GameEntity {
             if(FlappyBird.DRAW_HITBOXES) {
                 g2d.setColor(Color.RED);
                 g2d.drawRect(r.x, r.y, r.width, r.height);
+                Line2D line2D = scoringLine(r);
+                g2d.drawLine((int)line2D.getX1(), (int)line2D.getY1(), (int)line2D.getX2(), (int)line2D.getY2());
             }
         }
     }

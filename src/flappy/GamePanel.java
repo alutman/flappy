@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 public class GamePanel extends JPanel {
     private FlappyBird flappyBird;
-    private Font scoreFont, pauseFont;
+    private Font pauseFont;
     private final Color bgLight = new Color(211, 217, 222);
     private final Color bg = new Color(0x79, 0xB0, 0xDF);
 
@@ -19,7 +19,6 @@ public class GamePanel extends JPanel {
     public GamePanel(FlappyBird flappyBird, ArrayList<GameEntity> entities) {
         this.flappyBird = flappyBird;
         this.entities = entities;
-        scoreFont = new Font("Comic Sans MS", Font.BOLD, 18);
         pauseFont = new Font("Arial", Font.BOLD, 48);
     }
 
@@ -36,14 +35,15 @@ public class GamePanel extends JPanel {
             go.paint(g2d);
         }
 
-        g.setFont(scoreFont);
-        g.setColor(Color.BLACK);
-        g.drawString("Score: "+ flappyBird.getTick(), 10, 20);
         if(flappyBird.paused()) {
-            g.setFont(pauseFont);
-            g.setColor(new Color(0,0,0,170));
-            g.drawString("PAUSED", FlappyBird.WIDTH/2-100, FlappyBird.HEIGHT/2-100);
-            g.drawString("PRESS SPACE TO BEGIN", FlappyBird.WIDTH/2-300, FlappyBird.HEIGHT/2+50);
+            TextWriter.writeText(g2d,
+                    FlappyBird.WIDTH/2-100, FlappyBird.HEIGHT/2-100,
+                    pauseFont, new Color(0,0,0,200), new Color(0, 0, 0, 0),
+                    "PAUSED");
+            TextWriter.writeText(g2d,
+                    FlappyBird.WIDTH/2-175, FlappyBird.HEIGHT/2+50,
+                    pauseFont, new Color(0,0,0,200), new Color(0, 0, 0, 0),
+                    "CLICK TO BEGIN");
         }
 
     }

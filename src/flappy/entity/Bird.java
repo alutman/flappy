@@ -15,12 +15,13 @@ public class Bird implements GameEntity {
     public final int WIDTH = 30;
     public final int HEIGHT = 20;
 
-    private final float GRAVITY = 0.5f;
-    private final float JUMP_FORCE = -8f;
+    private float GRAVITY = 0.5f;
+    private float JUMP_FORCE = -8f;
+    private int WING_SPEED = FlappyBird.FPS / 2;
     private Image wingDown, wingMid, wingUp;
     public Rectangle hitbox = new Rectangle();
 
-    private static final int PADDING = 15; // Hitbox reduction padding (PNG has some alpha padding)
+    private static final int PADDING = 8; // Hitbox reduction padding (PNG has some alpha padding)
 
     private FlappyBird flappyBird;
 
@@ -42,10 +43,15 @@ public class Bird implements GameEntity {
     @Override
     public void tick() {
         x+=vx;
-        if(!FlappyBird.GOD_MODE){
-            y+=vy;
+        y+=vy;
+        if(FlappyBird.GOD_MODE){
+            y = Math.min(y, FlappyBird.HEIGHT-100);
+            if(y == FlappyBird.HEIGHT-100) {
+                vy = 0;
+            }
         }
         vy+=GRAVITY;
+
     }
 
     @Override
@@ -53,18 +59,38 @@ public class Bird implements GameEntity {
         hitbox.setBounds(Math.round(x- WIDTH) + PADDING/2, Math.round(y- HEIGHT) + PADDING/2, WIDTH *2 - PADDING, HEIGHT *2 - PADDING);
         Image img;
         int tick = flappyBird.getTick();
-        int r = tick % (FlappyBird.FPS / 2);
-        if(r < 10) {
+        int segment = (WING_SPEED) / 3;
+        int r = tick % (WING_SPEED / 2);
+        if(r < segment) {
             img = wingUp;
         }
-        else if(r < 20) {
+        else if(r < 2 * segment) {
             img = wingMid;
         }
         else {
             img = wingDown;
         }
 
-        g.drawImage(img, Math.round(x - WIDTH), Math.round(y - HEIGHT), 2 * WIDTH, 2 * HEIGHT, null);
+        if(vy < JUMP_FORCE*(7f/8f)) {
+            img=wingMid;
+        }
+        else if(vy < JUMP_FORCE*(6f/8f)) {
+            img=wingDown;
+        }
+
+
+        AffineTransform transform = g.getTransform();
+        g.translate(x, y);
+
+        double rotation = -0.35; // Face slightly up while we're moving up
+
+        if(vy >= 0) {
+            rotation = Math.min(-0.35 * vy / JUMP_FORCE, Math.toRadians(80)); // Actual rotation based off velocity
+        }
+
+        g.rotate(rotation,0,0);
+        g.drawImage(img, -WIDTH, -HEIGHT, 2 * WIDTH, 2 * HEIGHT, null);
+        g.setTransform(transform);
         if(FlappyBird.DRAW_HITBOXES) {
             g.setColor(Color.YELLOW);
             g.drawRect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);

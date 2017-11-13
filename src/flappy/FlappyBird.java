@@ -20,8 +20,8 @@ public class FlappyBird implements ActionListener {
     //Game entities
     private Bird bird;
     private Pipes pipes;
-    private Background background;
     private ArrayList<GameEntity> entities = new ArrayList<GameEntity>();
+    private int score = 0;
 
     //Panel entities
     private JFrame frame;
@@ -54,12 +54,12 @@ public class FlappyBird implements ActionListener {
     public FlappyBird() {
         bird = new Bird(this);
         pipes = new Pipes(this);
-        background = new Background();
 
         // Order is important here for painting
-        entities.add(background);
+        entities.add(new Background());
         entities.add(bird);
         entities.add(pipes);
+        entities.add(new Scoreboard(this));
 
         makeFrame();
 
@@ -68,6 +68,7 @@ public class FlappyBird implements ActionListener {
         t.start();
     }
 
+    private boolean hasIntersected = false;
     @Override
     public void actionPerformed(ActionEvent e) {
         //Main loop
@@ -78,10 +79,22 @@ public class FlappyBird implements ActionListener {
             boolean game = true;
             tick++;
             if(pipes.intersects(bird.hitbox) && !GOD_MODE) {
-                JOptionPane.showMessageDialog(frame, "You lose!\n"+"Your score was: "+ tick +".");
+                JOptionPane.showMessageDialog(frame, "You lose!\n"+"Your score was: "+ score +".");
                 game = false;
             }
-            if(bird.y > HEIGHT || bird.y+bird.HEIGHT < 0) {
+
+            if(pipes.intersectsLine(bird.hitbox)) {
+                if(!hasIntersected) {
+                    score++;
+                    hasIntersected = true;
+                }
+            }
+            else {
+                hasIntersected = false;
+            }
+
+            if(bird.y > HEIGHT) {
+                if(score > 0) JOptionPane.showMessageDialog(frame, "You lose!\n"+"Your score was: "+ score +".");
                 game = false;
             }
             if(!game) {
@@ -89,6 +102,7 @@ public class FlappyBird implements ActionListener {
                     go.reset();
                 }
                 tick = 0;
+                score = 0;
                 paused = true;
             }
         }
@@ -97,6 +111,7 @@ public class FlappyBird implements ActionListener {
     public int getTick() {
         return tick;
     }
+    public int getScore() { return score; }
 
     public Bird getBird () {
         return bird;
