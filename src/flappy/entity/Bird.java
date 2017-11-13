@@ -12,12 +12,12 @@ import java.io.IOException;
  */
 public class Bird implements GameEntity {
     public float x, y, vx, vy;
-    public final int WIDTH = 25;
-    public final int HEIGHT = 25;
+    public final int WIDTH = 30;
+    public final int HEIGHT = 20;
 
     private final float GRAVITY = 0.5f;
     private final float JUMP_FORCE = -8f;
-    private Image img;
+    private Image wingDown, wingMid, wingUp;
     public Rectangle hitbox = new Rectangle();
 
     private static final int PADDING = 15; // Hitbox reduction padding (PNG has some alpha padding)
@@ -30,7 +30,9 @@ public class Bird implements GameEntity {
         y = FlappyBird.HEIGHT/2;
         hitbox.setBounds(Math.round(x - WIDTH), Math.round(y - HEIGHT), WIDTH * 2, HEIGHT * 2);
         try {
-            img = ImageIO.read(Bird.class.getResourceAsStream("/bird.png"));
+            wingDown = ImageIO.read(Bird.class.getResourceAsStream("/wing_down.png"));
+            wingMid = ImageIO.read(Bird.class.getResourceAsStream("/wing_mid.png"));
+            wingUp = ImageIO.read(Bird.class.getResourceAsStream("/wing_up.png"));
         }
         catch(IOException e) {
             e.printStackTrace();
@@ -49,6 +51,19 @@ public class Bird implements GameEntity {
     @Override
     public void paint(Graphics2D g) {
         hitbox.setBounds(Math.round(x- WIDTH) + PADDING/2, Math.round(y- HEIGHT) + PADDING/2, WIDTH *2 - PADDING, HEIGHT *2 - PADDING);
+        Image img;
+        int tick = flappyBird.getTick();
+        int r = tick % (FlappyBird.FPS / 2);
+        if(r < 10) {
+            img = wingUp;
+        }
+        else if(r < 20) {
+            img = wingMid;
+        }
+        else {
+            img = wingDown;
+        }
+
         g.drawImage(img, Math.round(x - WIDTH), Math.round(y - HEIGHT), 2 * WIDTH, 2 * HEIGHT, null);
         if(FlappyBird.DRAW_HITBOXES) {
             g.setColor(Color.YELLOW);

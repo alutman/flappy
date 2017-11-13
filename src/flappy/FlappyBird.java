@@ -4,7 +4,6 @@ import flappy.entity.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 public class FlappyBird implements ActionListener {
     //Settings
     public static final int FPS = 60, WIDTH = 640, HEIGHT = 480;
-    public static final boolean DRAW_HITBOXES = true;
+    public static final boolean DRAW_HITBOXES = false;
     public static final boolean GOD_MODE = false;
 
     //Game entities
@@ -29,7 +28,7 @@ public class FlappyBird implements ActionListener {
     private JPanel panel;
 
     //Loop entities
-    private int time;
+    private int tick;
     private boolean paused;
 
     private void makeFrame() {
@@ -77,9 +76,9 @@ public class FlappyBird implements ActionListener {
                 go.tick();
             }
             boolean game = true;
-            time++;
+            tick++;
             if(pipes.intersects(bird.hitbox) && !GOD_MODE) {
-                JOptionPane.showMessageDialog(frame, "You lose!\n"+"Your score was: "+time+".");
+                JOptionPane.showMessageDialog(frame, "You lose!\n"+"Your score was: "+ tick +".");
                 game = false;
             }
             if(bird.y > HEIGHT || bird.y+bird.HEIGHT < 0) {
@@ -89,14 +88,14 @@ public class FlappyBird implements ActionListener {
                 for(GameEntity go : entities) {
                     go.reset();
                 }
-                time = 0;
+                tick = 0;
                 paused = true;
             }
         }
         panel.repaint();
     }
-    public int getScore() {
-        return time;
+    public int getTick() {
+        return tick;
     }
 
     public Bird getBird () {

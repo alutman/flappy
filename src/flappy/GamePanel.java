@@ -38,7 +38,7 @@ public class GamePanel extends JPanel {
 
         g.setFont(scoreFont);
         g.setColor(Color.BLACK);
-        g.drawString("Score: "+ flappyBird.getScore(), 10, 20);
+        g.drawString("Score: "+ flappyBird.getTick(), 10, 20);
         if(flappyBird.paused()) {
             g.setFont(pauseFont);
             g.setColor(new Color(0,0,0,170));

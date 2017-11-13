@@ -49,7 +49,7 @@ public class Pipes implements GameEntity {
 
     @Override
     public void tick() {
-        if(flappyBird.getScore() % 90 == 0) {
+        if(flappyBird.getTick() % 90 == 0) {
             Rectangle r = new Rectangle(WIDTH, 0, PIPE_W, (int) ((Math.random()*HEIGHT)/5f + (0.2f)*HEIGHT));
             int h2 = (int) ((Math.random()*HEIGHT)/5f + (0.2f)*HEIGHT);
             Rectangle r2 = new Rectangle(WIDTH, HEIGHT - h2, PIPE_W, h2);
