@@ -60,21 +60,21 @@ public class Bird implements GameEntity {
         Image img;
         int tick = flappyBird.getTick();
         int segment = (WING_SPEED) / 3;
-        int r = tick % (WING_SPEED / 2);
+        int r = tick % (WING_SPEED);
         if(r < segment) {
             img = wingUp;
         }
-        else if(r < 2 * segment) {
+        else if(r < (2 * segment)) {
             img = wingMid;
         }
         else {
             img = wingDown;
         }
 
-        if(vy < JUMP_FORCE*(7f/8f)) {
+        if(vy < JUMP_FORCE*(6f/8f)) {
             img=wingMid;
         }
-        else if(vy < JUMP_FORCE*(6f/8f)) {
+        else if(vy < JUMP_FORCE*(3f/8f)) {
             img=wingDown;
         }
 

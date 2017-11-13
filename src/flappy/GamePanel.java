@@ -11,8 +11,7 @@ import java.util.ArrayList;
 public class GamePanel extends JPanel {
     private FlappyBird flappyBird;
     private Font pauseFont;
-    private final Color bgLight = new Color(211, 217, 222);
-    private final Color bg = new Color(0x79, 0xB0, 0xDF);
+    private final Color bg = new Color(111, 186, 223);
 
     private ArrayList<GameEntity> entities = new ArrayList<GameEntity>();
 
@@ -27,13 +26,16 @@ public class GamePanel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
 
         // background color
-        int dist = FlappyBird.HEIGHT/2;
-        g2d.setPaint(new GradientPaint(FlappyBird.WIDTH-50,50, bgLight, FlappyBird.WIDTH-dist, dist, bg));
+        g2d.setColor(bg);
         g.fillRect(0,0,FlappyBird.WIDTH,FlappyBird.HEIGHT);
 
         for(GameEntity go : entities) {
             go.paint(g2d);
         }
+
+        // Flappy bird has a faint yellowy haze over it
+        g.setColor(new Color(230, 220, 0, 30));
+        g.fillRect(0, 0, FlappyBird.WIDTH, FlappyBird.HEIGHT);
 
         if(flappyBird.paused()) {
             TextWriter.writeText(g2d,

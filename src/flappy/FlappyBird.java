@@ -36,6 +36,7 @@ public class FlappyBird implements ActionListener {
 
         frame = new JFrame("Flappy Bird");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
         frame.add(panel);
         frame.setSize(WIDTH, HEIGHT);
         frame.setResizable(false);
@@ -44,6 +45,8 @@ public class FlappyBird implements ActionListener {
         } catch (IOException e) {
             // Who cares
         }
+
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
         InputListener inputListener = new InputListener(this);

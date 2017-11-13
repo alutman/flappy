@@ -29,16 +29,32 @@ public class Background implements GameEntity {
     public void reset() {
         buildings.clear();
 
-        for(int i = 0; i < FlappyBird.WIDTH; i += minWidth) {
-            addBuilding(i);
+        addBuilding(FlappyBird.WIDTH);
+        while(first().x > 0) {
+            tick();
         }
     }
 
-    private Building last() {
-        if(buildings.size() > 0) {
-            return buildings.get(buildings.size() -1);
+    private Building first() {
+        Building first = null;
+        for(Building b : buildings) {
+            if(first == null) first = b;
+            if(first.x > b.x) {
+                first = b;
+            }
         }
-        return null;
+        return first;
+    }
+
+    private Building last() {
+        Building last = null;
+        for(Building b : buildings) {
+            if(last == null) last = b;
+            if(last.x < b.x) {
+                last = b;
+            }
+        }
+        return last;
     }
 
     private final Color[] colors = {Color.GRAY, Color.WHITE, Color.ORANGE, Color.PINK};
@@ -66,13 +82,32 @@ public class Background implements GameEntity {
         return rand.nextInt(minWidth) + minimumX;
     }
     private int randomDepth() {
-        return rand.nextInt(5) + 1;
+        int r = rand.nextInt(5)+1;
+        if(rand.nextBoolean()) { // Give a greater chance for closer buildings
+            r -= 2;
+        }
+        return Math.max(r, 1);
     }
 
     private void addBuilding(int minimumX) {
         Building newBuilding = new Building(randomLoc(minimumX),randomWindows(),randomFloors(), randomDepth(), randomColor());
         buildings.add(newBuilding);
     }
+    private void addBuilding(int minimumX, int maximumDepth) {
+        Building newBuilding = new Building(randomLoc(minimumX),randomWindows(),randomFloors(), Math.min(randomDepth(), maximumDepth), randomColor());
+        buildings.add(newBuilding);
+    }
+
+    // Positive if mostly deep buildings, negative if mostly shallow
+    private int depthSum() {
+        int sum = 0;
+        for(Building b : buildings) {
+            sum += (b.depth - 3);
+        }
+        return sum;
+    }
+
+
 
     @Override
     public void tick() {
@@ -84,6 +119,9 @@ public class Background implements GameEntity {
 
         if(last().x < FlappyBird.WIDTH - minWidth) {
             addBuilding(FlappyBird.WIDTH);
+        }
+        if(depthSum() > 0) {
+            addBuilding(FlappyBird.WIDTH, 2); // Too many deep buildings, add some shallow to balance it out
         }
 
         ArrayList<Building> toRemove = new ArrayList<Building>();
@@ -153,6 +191,14 @@ class Building {
 
 
     public Building(int x, int windows, int floors, int depth, Color color) {
+        // Reduce the size for deeper buildings
+        int depth_adj = (depth-1) * 2;
+        window_width -= depth_adj;
+        window_height -= depth_adj;
+        border_padding -= depth_adj;
+        window_padding -= depth_adj;
+        floor_padding -= depth_adj;
+
         this.width = realWidth(windows);
         this.height = realHeight(floors);
         this.floors = floors;
@@ -162,13 +208,6 @@ class Building {
         this.x = x;
         this.y = FlappyBird.HEIGHT - this.height;
 
-        // Reduce the size for deeper buildings
-        int depth_adj = (depth-1) * 2;
-        window_width -= depth_adj;
-        window_height -= depth_adj;
-        border_padding -= depth_adj;
-        window_padding -= depth_adj;
-        floor_padding -= depth_adj;
     }
 
     public void update(float x) {
