@@ -113,7 +113,9 @@ public class Background implements GameEntity {
     public void tick() {
         for(Building b : buildings) {
             // Reduce the velocity depending on how deep a building is (parallax)
-            float speed = (1f/(float)b.depth) * (float) SCROLL_VELOCITY; //fkn java, i'm doing float arithmetic, not int
+            float speed = (1f /
+                        Math.min(4f,b.depth)) //Depth 5 is too slow to render nicely
+                    * (float) SCROLL_VELOCITY;
             b.update(speed);
         }
 

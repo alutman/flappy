@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 
+// Utility class for writing bordered text
 public class TextWriter {
 
     public static void writeText(Graphics2D g, int x, int y, Font font, Color inner, Color outer, String message) {
@@ -18,16 +19,8 @@ public class TextWriter {
 
         GlyphVector gv = font.createGlyphVector(g.getFontRenderContext(),
                 message);
-        int i = 0;
-        while(true) {
-            try {
-                Shape jshape = gv.getGlyphOutline(i++);
-                g.draw(jshape);
-            }
-            catch(IndexOutOfBoundsException e) {
-                break;
-            }
-        }
+        g.draw(gv.getOutline());
+
         g.setTransform(transform);
     }
 }

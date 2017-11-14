@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 
+import static flappy.Settings.*;
+
 /**
  * Represents the player
  */
@@ -15,13 +17,12 @@ public class Bird implements GameEntity {
     public final int WIDTH = 30;
     public final int HEIGHT = 20;
 
-    private float GRAVITY = 0.5f;
-    private float JUMP_FORCE = -8f;
     private int WING_SPEED = FlappyBird.FPS / 2;
     private Image wingDown, wingMid, wingUp;
     public Rectangle hitbox = new Rectangle();
+    private boolean alive = true;
+    private int hit = 0;
 
-    private static final int PADDING = 8; // Hitbox reduction padding (PNG has some alpha padding)
 
     private FlappyBird flappyBird;
 
@@ -40,25 +41,55 @@ public class Bird implements GameEntity {
         }
     }
 
+    public void kill() {
+        this.alive = false;
+    }
+
+    // Trigger a hit flash
+    public void hit() {
+        if(hit == 0) hit = 10;
+    }
+
     @Override
     public void tick() {
         x+=vx;
         y+=vy;
-        if(FlappyBird.GOD_MODE){
+        if(GOD_MODE){ // Stop bird from falling off map
             y = Math.min(y, FlappyBird.HEIGHT-100);
             if(y == FlappyBird.HEIGHT-100) {
                 vy = 0;
             }
         }
-        vy+=GRAVITY;
-
+        if(!flappyBird.hasGameStarted()) { // Stable starting flight
+            if(y > FlappyBird.HEIGHT/2+30) {
+                vy -= 0.5;
+            }
+            else {
+                vy += 0.5;
+            }
+        }
+        else {
+            vy+=GRAVITY;
+        }
     }
 
     @Override
     public void paint(Graphics2D g) {
-        hitbox.setBounds(Math.round(x- WIDTH) + PADDING/2, Math.round(y- HEIGHT) + PADDING/2, WIDTH *2 - PADDING, HEIGHT *2 - PADDING);
+        RenderingHints originalRendering = g.getRenderingHints();
+        // Bird style is pixel art, don't want to anti-alias here
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+
+        if(y > FlappyBird.HEIGHT) return; // Off map, stop rendering
+
+        if(!alive) { //Game over, make bird fall
+            vy+=GRAVITY;
+            y+=vy;
+        }
+        hitbox.setBounds(Math.round(x- WIDTH) + HITBOX_TOLERANCE /2, Math.round(y- HEIGHT) + HITBOX_TOLERANCE /2, WIDTH *2 - HITBOX_TOLERANCE, HEIGHT *2 - HITBOX_TOLERANCE);
         Image img;
         int tick = flappyBird.getTick();
+        // Divide tick into discrete intervals of 3 (3 bird frames)
         int segment = (WING_SPEED) / 3;
         int r = tick % (WING_SPEED);
         if(r < segment) {
@@ -71,6 +102,7 @@ public class Bird implements GameEntity {
             img = wingDown;
         }
 
+        // Override frame if doing a jump
         if(vy < JUMP_FORCE*(6f/8f)) {
             img=wingMid;
         }
@@ -91,21 +123,39 @@ public class Bird implements GameEntity {
         g.rotate(rotation,0,0);
         g.drawImage(img, -WIDTH, -HEIGHT, 2 * WIDTH, 2 * HEIGHT, null);
         g.setTransform(transform);
-        if(FlappyBird.DRAW_HITBOXES) {
+
+        if(DRAW_HITBOXES) {
             g.setColor(Color.YELLOW);
             g.drawRect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
         }
 
+        // Show a hit register flash
+        if(hit > 0) {
+            //TODO properly flash the image rather than draw a circle on it
+            int alpha = (int)(200 * ((float)hit/10f));
+            Color intensity = new Color(255,255,255, alpha);
+            Color alphaColor = new Color(0,0,0,0);
+            RadialGradientPaint radialGradientPaint = new RadialGradientPaint((float) (hitbox.x + (hitbox.width / 2)), ((float) (hitbox.y + (hitbox.height / 2))),
+                    ((float) HEIGHT), new float[]{0.7f, 1f}, new Color[]{intensity, alphaColor});
+            g.setPaint(radialGradientPaint);
+            g.fillOval(hitbox.x, hitbox.y, hitbox.width-5, hitbox.height);
+            hit--;
+        }
+
+        g.setRenderingHints(originalRendering);
     }
 
     @Override
     public void reset() {
-        x = 640/2;
-        y = 640/2;
-        vx = vy = 0;
+        x = FlappyBird.WIDTH/2;
+        y = FlappyBird.HEIGHT/2;
+        vx = 0;
+        vy = 0;
+        alive = true;
     }
 
     public void jump() {
         vy = JUMP_FORCE;
     }
+
 }

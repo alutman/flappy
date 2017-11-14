@@ -5,7 +5,7 @@ import java.awt.event.*;
 /**
  * Game input listener
  */
-public class InputListener implements KeyListener, MouseListener {
+public class InputListener implements MouseListener {
 
     private FlappyBird flappyBird;
     public InputListener(FlappyBird flappyBird) {
@@ -15,28 +15,12 @@ public class InputListener implements KeyListener, MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON1) {
-            if(flappyBird.paused()) flappyBird.setPaused(false);
-            flappyBird.getBird().jump();
+            if(!flappyBird.hasGameStarted()) flappyBird.startGame();
+            if(flappyBird.isGameOver()) flappyBird.reset();
+            //only allow jumps during active gameplay
+            if(flappyBird.hasGameStarted() && !flappyBird.isGameOver())flappyBird.getBird().jump();
+
         }
-    }
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode()==KeyEvent.VK_UP) {
-            flappyBird.getBird().jump();
-        }
-        else if(e.getKeyCode()==KeyEvent.VK_SPACE) {
-            flappyBird.setPaused(false);
-        }
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-
     }
 
     @Override

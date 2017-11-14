@@ -8,14 +8,14 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static flappy.Settings.GOD_MODE;
+
 /**
  * Main game setup and loop class
  */
 public class FlappyBird implements ActionListener {
     //Settings
     public static final int FPS = 60, WIDTH = 640, HEIGHT = 480;
-    public static final boolean DRAW_HITBOXES = false;
-    public static final boolean GOD_MODE = false;
 
     //Game entities
     private Bird bird;
@@ -27,9 +27,11 @@ public class FlappyBird implements ActionListener {
     private JFrame frame;
     private JPanel panel;
 
-    //Loop entities
+    //Loop control
     private int tick;
-    private boolean paused;
+    private boolean gameOver = false;
+    private boolean gameStarted = false;
+    private long endTime = -1;
 
     private void makeFrame() {
         panel = new GamePanel(this, entities);
@@ -50,7 +52,6 @@ public class FlappyBird implements ActionListener {
         frame.setVisible(true);
 
         InputListener inputListener = new InputListener(this);
-        frame.addKeyListener(inputListener);
         frame.addMouseListener(inputListener);
     }
 
@@ -60,13 +61,12 @@ public class FlappyBird implements ActionListener {
 
         // Order is important here for painting
         entities.add(new Background());
-        entities.add(bird);
         entities.add(pipes);
+        entities.add(bird);
         entities.add(new Scoreboard(this));
 
         makeFrame();
 
-        paused = true;
         Timer t = new Timer(1000 / FPS, this);
         t.start();
     }
@@ -75,42 +75,46 @@ public class FlappyBird implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         //Main loop
-        if(!paused) {
+        if(!gameOver)  {
             for(GameEntity go : entities) {
                 go.tick();
             }
-            boolean game = true;
             tick++;
-            if(pipes.intersects(bird.hitbox) && !GOD_MODE) {
-                JOptionPane.showMessageDialog(frame, "You lose!\n"+"Your score was: "+ score +".");
-                game = false;
-            }
+        }
 
-            if(pipes.intersectsLine(bird.hitbox)) {
-                if(!hasIntersected) {
-                    score++;
-                    hasIntersected = true;
-                }
-            }
-            else {
-                hasIntersected = false;
-            }
+        // Hit a pipe?
+        if(pipes.intersects(bird.hitbox)) {
+            if(!gameOver)bird.hit();
+            if(!GOD_MODE) gameOver = true;
+        }
 
-            if(bird.y > HEIGHT) {
-                if(score > 0) JOptionPane.showMessageDialog(frame, "You lose!\n"+"Your score was: "+ score +".");
-                game = false;
-            }
-            if(!game) {
-                for(GameEntity go : entities) {
-                    go.reset();
-                }
-                tick = 0;
-                score = 0;
-                paused = true;
+        // Fell off map?
+        if(bird.y > HEIGHT) {
+            gameOver = true;
+        }
+
+        // Hit a score trigger?
+        if(pipes.intersectsScoringLine(bird.hitbox)) {
+            //Only score once per line by using hasIntersected
+            // Without this, we'd get a score for each frame the bird intersects the line
+            if(!hasIntersected) {
+                score++;
+                hasIntersected = true;
             }
         }
+        else { // We've left the trigger, can re-fire scoring now
+            hasIntersected = false;
+        }
+
+        if(gameOver && endTime < 0) { // End time condition stops this firing constantly during game over
+            bird.kill();
+            endTime = System.currentTimeMillis();
+        }
+
         panel.repaint();
     }
+
+
     public int getTick() {
         return tick;
     }
@@ -119,11 +123,25 @@ public class FlappyBird implements ActionListener {
     public Bird getBird () {
         return bird;
     }
-    public boolean paused() {
-        return paused;
+
+    public void reset() {
+        if(System.currentTimeMillis() - endTime < 1000) { return; } // prevent accidental gameover close from clicking too fast
+        for(GameEntity go : entities) {
+            go.reset();
+        }
+        endTime = -1;
+        tick = 0;
+        score = 0;
+        gameOver = false;
+        gameStarted = false;
     }
-    public void setPaused(boolean b) {
-        paused = b;
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+    public void startGame() { gameStarted = true; }
+    public boolean hasGameStarted() {
+        return gameStarted;
     }
 
     public static void main(String[] args) {
