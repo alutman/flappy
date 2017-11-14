@@ -52,7 +52,10 @@ public class FlappyBird implements ActionListener {
         frame.setVisible(true);
 
         InputListener inputListener = new InputListener(this);
+
+        frame.setFocusTraversalKeysEnabled(false);
         frame.addMouseListener(inputListener);
+        frame.addKeyListener(inputListener);
     }
 
     public FlappyBird() {

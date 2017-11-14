@@ -2,8 +2,8 @@ package flappy;
 
 // General static class for settings around gameplay
 public class Settings {
-    public static final boolean GOD_MODE = false;
-    public static final boolean DRAW_HITBOXES = false;
+    public static boolean GOD_MODE = false;
+    public static boolean DRAW_HITBOXES = false;
 
     public static final int PIPE_GAP = 75;
     public static final int PIPE_FREQUENCY = 90;

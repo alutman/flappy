@@ -40,6 +40,13 @@ public class GamePanel extends JPanel {
         g.setColor(new Color(230, 220, 0, 30));
         g.fillRect(0, 0, FlappyBird.WIDTH, FlappyBird.HEIGHT);
 
+        if(Settings.GOD_MODE) {
+            TextWriter.writeText(g2d,
+                    20, 20,
+                    pauseFont.deriveFont(20f), new Color(0,0,0,200), new Color(0, 0, 0, 0),
+                    "God Mode");
+        }
+
         if(!flappyBird.hasGameStarted()) {
             TextWriter.writeText(g2d,
                     FlappyBird.WIDTH/2-175, FlappyBird.HEIGHT/2,
